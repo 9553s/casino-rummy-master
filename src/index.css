@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -87,6 +88,26 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.6);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 215, 0, 0.8);
+  }
+
   /* Force landscape on mobile for game screens */
   @media screen and (max-width: 768px) and (orientation: portrait) {
     .force-landscape {
@@ -106,12 +127,12 @@
 @layer components {
   .casino-bg {
     background: 
-      radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 40% 80%, rgba(11, 123, 61, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(11, 123, 61, 0.25) 0%, transparent 50%),
       linear-gradient(135deg, #0B7B3D 0%, #094A26 25%, #0B7B3D 50%, #0E8B45 75%, #094A26 100%);
     background-size: 400% 400%, 300% 300%, 500% 500%, 200% 200%;
-    animation: casino-glow 12s ease infinite;
+    animation: casino-glow 15s ease infinite;
   }
 
   .felt-table {
@@ -127,31 +148,30 @@
 
   .card-shadow {
     box-shadow: 
-      0 8px 25px rgba(0,0,0,0.4),
-      0 4px 10px rgba(0,0,0,0.3),
-      0 2px 4px rgba(0,0,0,0.2);
+      0 6px 20px rgba(0,0,0,0.3),
+      0 3px 8px rgba(0,0,0,0.2),
+      0 1px 3px rgba(0,0,0,0.1);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .card-shadow:hover {
     box-shadow: 
-      0 15px 35px rgba(0,0,0,0.5),
-      0 8px 20px rgba(0,0,0,0.4),
-      0 4px 8px rgba(0,0,0,0.3);
-    transform: translateY(-3px);
+      0 12px 30px rgba(0,0,0,0.4),
+      0 6px 15px rgba(0,0,0,0.3),
+      0 3px 6px rgba(0,0,0,0.2);
   }
 
   .glass-effect {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 8px 32px rgba(0, 0, 0, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
   .glass-effect:hover {
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 215, 0, 0.4);
     transform: translateY(-2px);
     transition: all 0.3s ease;
@@ -248,6 +268,17 @@
   100% { transform: rotateY(0deg); }
 }
 
+@keyframes card-deal {
+  0% { 
+    opacity: 0; 
+    transform: translateY(20px) scale(0.8); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
 .animate-float-gentle {
   animation: float-gentle 4s ease-in-out infinite;
 }
@@ -258,4 +289,8 @@
 
 .animate-card-flip {
   animation: card-flip 0.6s ease-in-out;
+}
+
+.animate-card-deal {
+  animation: card-deal 0.3s ease-out forwards;
 }
