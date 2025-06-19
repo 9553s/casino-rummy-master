@@ -16,6 +16,7 @@ interface PlayingCardProps {
   size?: 'sm' | 'md' | 'lg';
   onClick?: () => void;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const PlayingCard: React.FC<PlayingCardProps> = ({
@@ -27,7 +28,8 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
   faceDown = false,
   size = 'md',
   onClick,
-  className
+  className,
+  style
 }) => {
   const getSuitIcon = (suit: Suit) => {
     const iconProps = { className: "w-full h-full" };
@@ -59,6 +61,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
           className
         )}
         onClick={onClick}
+        style={style}
       >
         <div className="absolute inset-2 rounded border-2 border-blue-400 bg-gradient-to-br from-blue-600 to-blue-800">
           <div className="w-full h-full flex items-center justify-center">
@@ -84,6 +87,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
         className
       )}
       onClick={onClick}
+      style={style}
     >
       {/* Top-left corner */}
       <div className={cn(
