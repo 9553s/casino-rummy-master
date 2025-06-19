@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -52,15 +53,17 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
+				// Casino theme colors
+				casino: {
+					green: '#0B7B3D',
+					'green-light': '#0E8B45',
+					'green-dark': '#094A26',
+					gold: '#FFD700',
+					'gold-light': '#FFED4A',
+					'gold-dark': '#F59E0B',
+					red: '#DC2626',
+					'red-light': '#EF4444',
+					felt: '#1B5E20'
 				}
 			},
 			borderRadius: {
@@ -84,11 +87,44 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'card-deal': {
+					'0%': {
+						transform: 'translateX(-100px) rotate(-20deg)',
+						opacity: '0'
+					},
+					'100%': {
+						transform: 'translateX(0) rotate(0deg)',
+						opacity: '1'
+					}
+				},
+				'pulse-gold': {
+					'0%, 100%': {
+						boxShadow: '0 0 0 0 rgba(255, 215, 0, 0.7)'
+					},
+					'70%': {
+						boxShadow: '0 0 0 10px rgba(255, 215, 0, 0)'
+					}
+				},
+				'float': {
+					'0%, 100%': {
+						transform: 'translateY(0px)'
+					},
+					'50%': {
+						transform: 'translateY(-10px)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'card-deal': 'card-deal 0.6s ease-out',
+				'pulse-gold': 'pulse-gold 2s infinite',
+				'float': 'float 3s ease-in-out infinite'
+			},
+			backgroundImage: {
+				'felt-texture': 'radial-gradient(ellipse at center, #0B7B3D 0%, #094A26 100%)',
+				'card-back': 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e3a8a 100%)'
 			}
 		}
 	},
