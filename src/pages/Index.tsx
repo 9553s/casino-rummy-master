@@ -45,7 +45,7 @@ const Index = () => {
 
       {/* Guest ID Display */}
       <div className="absolute top-6 right-6 z-10">
-        <Badge variant="secondary" className="glass-effect text-white-contrast border-white/20 px-6 py-3 text-base font-semibold backdrop-blur-md">
+        <Badge variant="secondary" className="bg-white border-gray-300 text-gray-800 px-6 py-3 text-base font-semibold shadow-lg">
           <Users className="w-5 h-5 mr-2" />
           {guestId}
         </Badge>
@@ -82,15 +82,15 @@ const Index = () => {
           {/* Game Mode Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Player vs Bot */}
-            <Card className="group hover:scale-105 transition-all duration-500 glass-effect border-casino-gold/20 hover:border-casino-gold/60 relative overflow-hidden">
+            <Card className="group hover:scale-105 transition-all duration-500 bg-white border-gray-200 hover:border-casino-gold/60 hover:shadow-2xl relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-casino-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardContent className="p-10 text-center relative z-10">
                 <div className="mb-8">
                   <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-casino-gold via-casino-gold-light to-casino-gold-dark flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-shadow duration-500">
                     <Bot className="w-12 h-12 text-black" />
                   </div>
-                  <h3 className="text-3xl font-bold text-white-contrast mb-3 group-hover:text-casino-gold-contrast transition-colors duration-300">Player vs Bot</h3>
-                  <p className="text-white/90 text-base leading-relaxed">Challenge our intelligent AI opponent and sharpen your skills</p>
+                  <h3 className="text-3xl font-bold text-gray-800 mb-3 group-hover:text-casino-gold transition-colors duration-300">Player vs Bot</h3>
+                  <p className="text-gray-600 text-base leading-relaxed">Challenge our intelligent AI opponent and sharpen your skills</p>
                 </div>
                 <Button 
                   onClick={handlePlayerVsBot}
@@ -103,15 +103,15 @@ const Index = () => {
             </Card>
 
             {/* Quick Join */}
-            <Card className="group hover:scale-105 transition-all duration-500 glass-effect border-green-500/20 hover:border-green-400/60 relative overflow-hidden">
+            <Card className="group hover:scale-105 transition-all duration-500 bg-white border-gray-200 hover:border-green-400/60 hover:shadow-2xl relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardContent className="p-10 text-center relative z-10">
                 <div className="mb-8">
                   <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-green-400 via-green-500 to-green-600 flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-shadow duration-500">
                     <Zap className="w-12 h-12 text-white" />
                   </div>
-                  <h3 className="text-3xl font-bold text-white-contrast mb-3 group-hover:text-green-400 transition-colors duration-300">Quick Join</h3>
-                  <p className="text-white/90 text-base leading-relaxed">Jump into any available room instantly and start playing</p>
+                  <h3 className="text-3xl font-bold text-gray-800 mb-3 group-hover:text-green-600 transition-colors duration-300">Quick Join</h3>
+                  <p className="text-gray-600 text-base leading-relaxed">Jump into any available room instantly and start playing</p>
                 </div>
                 <Button 
                   onClick={handleQuickJoin}
@@ -124,22 +124,22 @@ const Index = () => {
             </Card>
 
             {/* Play with Friends */}
-            <Card className="group hover:scale-105 transition-all duration-500 glass-effect border-purple-500/20 hover:border-purple-400/60 relative overflow-hidden">
+            <Card className="group hover:scale-105 transition-all duration-500 bg-white border-gray-200 hover:border-purple-400/60 hover:shadow-2xl relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <CardContent className="p-10 text-center relative z-10">
                 <div className="mb-8">
                   <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-400 via-purple-500 to-purple-600 flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-shadow duration-500">
                     <Crown className="w-12 h-12 text-white" />
                   </div>
-                  <h3 className="text-3xl font-bold text-white-contrast mb-3 group-hover:text-purple-400 transition-colors duration-300">Play with Friends</h3>
-                  <p className="text-white/90 text-base leading-relaxed">Create private rooms and invite your friends to play</p>
+                  <h3 className="text-3xl font-bold text-gray-800 mb-3 group-hover:text-purple-600 transition-colors duration-300">Create Room/Join Room</h3>
+                  <p className="text-gray-600 text-base leading-relaxed">Create private rooms and invite your friends to play</p>
                 </div>
                 <Button 
                   onClick={handlePlayWithFriends}
                   className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500 text-white font-bold py-4 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all duration-300 border border-purple-400/20"
                 >
                   <Crown className="w-5 h-5 mr-2" />
-                  Create Room
+                  Create/Join Room
                 </Button>
               </CardContent>
             </Card>
@@ -147,7 +147,7 @@ const Index = () => {
 
           {/* Footer Info */}
           <div className="text-center mt-16">
-            <div className="glass-effect rounded-2xl px-8 py-6 max-w-2xl mx-auto border border-white/10">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl px-8 py-6 max-w-2xl mx-auto border border-white/20 shadow-xl">
               <p className="text-white-contrast text-lg font-medium mb-2">
                 🎯 2-6 Players • 🃏 13 Cards • 🎲 Indian Rummy Rules
               </p>

@@ -135,29 +135,29 @@ const Game = () => {
   return (
     <div className={`min-h-screen casino-bg relative overflow-hidden ${window.innerWidth <= 768 ? 'force-landscape' : ''}`}>
       {/* Game Header */}
-      <div className="absolute top-0 left-0 right-0 z-10 bg-black/30 backdrop-blur-sm border-b border-white/20">
+      <div className="absolute top-0 left-0 right-0 z-20 bg-black/50 backdrop-blur-md border-b border-casino-gold/30">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-4">
             <Button
               onClick={() => navigate('/lobby/' + roomCode)}
               variant="outline"
               size="sm"
-              className="border-white/30 text-white hover:bg-white/10"
+              className="bg-white border-gray-300 text-gray-800 hover:bg-gray-100 shadow-lg"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Leave
+              Leave Game
             </Button>
-            <Badge className="bg-casino-gold text-black font-semibold">
+            <Badge className="bg-casino-gold text-black font-semibold px-4 py-2 shadow-lg">
               Room {roomCode}
             </Badge>
           </div>
 
           <div className="flex items-center gap-4">
-            <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+            <Badge className="bg-red-500/20 text-red-400 border-red-500/50 px-4 py-2 shadow-lg">
               <Timer className="w-3 h-3 mr-1" />
               {turnTimer}s
             </Badge>
-            <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+            <Badge variant="secondary" className="bg-white text-gray-800 border-gray-300 px-4 py-2 shadow-lg">
               <Users className="w-4 h-4 mr-2" />
               {guestId}
             </Badge>
@@ -168,21 +168,23 @@ const Game = () => {
       {/* Game Table */}
       <div className="pt-20 pb-4 px-4 h-screen flex flex-col">
         {/* Opponents */}
-        <div className="flex justify-center gap-8 mb-4">
+        <div className="flex justify-center gap-8 mb-6">
           {players.filter(p => p.id !== 'guest1234').map((player, index) => (
             <div key={player.id} className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-full bg-casino-gold flex items-center justify-center">
-                  <span className="text-black font-bold text-sm">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <div className="w-10 h-10 rounded-full bg-white border-2 border-casino-gold flex items-center justify-center shadow-lg">
+                  <span className="text-casino-gold font-bold text-sm">
                     {player.name.charAt(0).toUpperCase()}
                   </span>
                 </div>
-                <span className="text-white text-sm font-medium">{player.name}</span>
-                {player.isCurrentTurn && (
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                )}
+                <div className="bg-white/90 rounded-lg px-3 py-1 shadow-lg">
+                  <span className="text-gray-800 text-sm font-semibold">{player.name}</span>
+                  {player.isCurrentTurn && (
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse inline-block ml-2" />
+                  )}
+                </div>
               </div>
-              <div className="flex gap-1">
+              <div className="flex justify-center gap-1">
                 {Array.from({ length: Math.min(player.cardCount, 8) }).map((_, i) => (
                   <PlayingCard
                     key={i}
@@ -190,11 +192,11 @@ const Game = () => {
                     rank="A"
                     faceDown
                     size="sm"
-                    className="transform -ml-2"
+                    className="transform -ml-2 shadow-lg"
                   />
                 ))}
                 {player.cardCount > 8 && (
-                  <Badge className="ml-1 bg-white/20 text-white text-xs">
+                  <Badge className="ml-2 bg-white text-gray-800 text-xs shadow-lg">
                     +{player.cardCount - 8}
                   </Badge>
                 )}
@@ -203,72 +205,91 @@ const Game = () => {
           ))}
         </div>
 
-        {/* Central Area */}
+        {/* Casino Table Central Area */}
         <div className="flex-1 flex items-center justify-center">
-          <div className="felt-table rounded-3xl p-8 max-w-4xl w-full">
-            <div className="flex items-center justify-center gap-8">
+          <div className="felt-table rounded-[3rem] p-12 max-w-5xl w-full relative">
+            {/* Table decorations */}
+            <div className="absolute inset-4 border-2 border-casino-gold/20 rounded-[2.5rem] pointer-events-none"></div>
+            <div className="absolute top-8 left-1/2 transform -translate-x-1/2 text-casino-gold text-lg font-bold opacity-30">
+              RUMMY
+            </div>
+            
+            <div className="flex items-center justify-center gap-12">
               {/* Deck */}
-              <div className="text-center">
-                <div className="mb-2">
+              <div className="text-center group">
+                <div className="mb-4 relative">
                   <PlayingCard
                     suit="spades"
                     rank="A"
                     faceDown
                     size="lg"
                     onClick={handleDrawCard}
-                    className={isMyTurn ? 'hover:scale-110 cursor-pointer' : 'cursor-not-allowed opacity-60'}
+                    className={`${isMyTurn ? 'hover:scale-110 cursor-pointer shadow-2xl' : 'cursor-not-allowed opacity-60'} transition-all duration-300`}
                   />
+                  <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-casino-gold rounded-full flex items-center justify-center text-black text-xs font-bold">
+                    52
+                  </div>
                 </div>
-                <span className="text-white/80 text-sm font-medium">Deck</span>
+                <div className="bg-white/90 rounded-lg px-4 py-2 shadow-lg">
+                  <span className="text-gray-800 font-bold">DECK</span>
+                </div>
               </div>
 
               {/* Joker */}
-              <div className="text-center">
-                <div className="mb-2">
+              <div className="text-center group">
+                <div className="mb-4 relative">
                   <PlayingCard
                     suit={jokerCard.suit}
                     rank={jokerCard.rank}
                     size="lg"
                     isJoker
+                    className="shadow-2xl ring-4 ring-casino-gold/50"
                   />
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-casino-gold text-black px-2 py-1 rounded-full text-xs font-bold">
+                    JOKER
+                  </div>
                 </div>
-                <span className="text-casino-gold text-sm font-bold">Joker</span>
+                <div className="bg-casino-gold rounded-lg px-4 py-2 shadow-lg">
+                  <span className="text-black font-bold">WILD CARD</span>
+                </div>
               </div>
 
               {/* Discard Pile */}
-              <div className="text-center">
-                <div className="mb-2">
+              <div className="text-center group">
+                <div className="mb-4 relative">
                   <PlayingCard
                     suit={discardPile.suit}
                     rank={discardPile.rank}
                     size="lg"
                     onClick={handleDrawDiscard}
-                    className={isMyTurn ? 'hover:scale-110 cursor-pointer' : 'cursor-not-allowed opacity-60'}
+                    className={`${isMyTurn ? 'hover:scale-110 cursor-pointer shadow-2xl' : 'cursor-not-allowed opacity-60'} transition-all duration-300`}
                   />
                 </div>
-                <span className="text-white/80 text-sm font-medium">Discard</span>
+                <div className="bg-white/90 rounded-lg px-4 py-2 shadow-lg">
+                  <span className="text-gray-800 font-bold">DISCARD</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Player Hand */}
-        <div className="space-y-4">
+        {/* Player Hand Area */}
+        <div className="space-y-6">
           {/* Action Buttons */}
           <div className="flex justify-center gap-4">
             <Button
               onClick={handleArrange}
               disabled={hasArranged}
-              className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-500"
+              className="bg-white text-gray-800 hover:bg-gray-100 disabled:bg-gray-300 border-2 border-gray-300 shadow-lg font-semibold"
             >
               <RotateCcw className="w-4 h-4 mr-2" />
-              {hasArranged ? 'Arranged' : 'Arrange'}
+              {hasArranged ? 'Arranged' : 'Arrange Cards'}
             </Button>
             
             <Button
               onClick={handleDiscard}
               disabled={!isMyTurn || selectedCards.length !== 1}
-              className="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-500"
+              className="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white shadow-lg font-semibold"
             >
               Discard ({selectedCards.length})
             </Button>
@@ -276,16 +297,16 @@ const Game = () => {
             <Button
               onClick={handleDeclare}
               disabled={!isMyTurn}
-              className="bg-green-500 hover:bg-green-600 disabled:bg-gray-500"
+              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white shadow-lg font-semibold"
             >
               <Trophy className="w-4 h-4 mr-2" />
-              Declare
+              Declare Winner
             </Button>
           </div>
 
           {/* Hand Cards */}
           <div className="flex justify-center">
-            <div className="flex gap-2 max-w-full overflow-x-auto pb-2">
+            <div className="flex gap-3 max-w-full overflow-x-auto pb-4 px-4">
               {hand.map((card, index) => (
                 <PlayingCard
                   key={card.id}
@@ -293,7 +314,7 @@ const Game = () => {
                   rank={card.rank}
                   isSelected={selectedCards.includes(card.id)}
                   onClick={() => handleCardSelect(card.id)}
-                  className="flex-shrink-0 animate-card-deal"
+                  className="flex-shrink-0 animate-card-deal shadow-xl hover:shadow-2xl transition-all duration-300"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 />
               ))}
@@ -303,15 +324,15 @@ const Game = () => {
           {/* Turn Indicator */}
           <div className="text-center">
             {isMyTurn ? (
-              <Badge className="bg-green-500 text-white font-semibold px-4 py-2">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Your Turn
-              </Badge>
+              <div className="bg-green-500 text-white font-bold px-6 py-3 rounded-full shadow-xl inline-flex items-center gap-2">
+                <CheckCircle className="w-5 h-5" />
+                Your Turn - Make Your Move!
+              </div>
             ) : (
-              <Badge className="bg-gray-500 text-white px-4 py-2">
-                <Timer className="w-4 h-4 mr-2" />
+              <div className="bg-white text-gray-800 px-6 py-3 rounded-full shadow-xl inline-flex items-center gap-2 border-2 border-gray-300">
+                <Timer className="w-5 h-5" />
                 Waiting for {currentPlayer?.name}
-              </Badge>
+              </div>
             )}
           </div>
         </div>

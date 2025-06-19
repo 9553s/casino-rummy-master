@@ -80,7 +80,7 @@ const Lobby = () => {
     <div className="min-h-screen casino-bg relative overflow-hidden">
       {/* Guest ID Display */}
       <div className="absolute top-4 right-4 z-10">
-        <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-4 py-2 text-sm font-medium">
+        <Badge variant="secondary" className="bg-white text-gray-800 border-gray-300 px-4 py-2 text-sm font-medium shadow-lg">
           <Users className="w-4 h-4 mr-2" />
           {guestId}
         </Badge>
@@ -91,7 +91,7 @@ const Lobby = () => {
         <Button
           onClick={() => navigate('/friends')}
           variant="outline"
-          className="border-white/30 text-white hover:bg-white/10"
+          className="bg-white border-gray-300 text-gray-800 hover:bg-gray-100 shadow-lg"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
@@ -119,21 +119,21 @@ const Lobby = () => {
             {/* Room Settings & Share */}
             <div className="lg:col-span-1 space-y-4">
               {/* Room Code Card */}
-              <Card className="glass-effect border-casino-gold/30">
+              <Card className="bg-white border-gray-200 shadow-xl">
                 <CardHeader>
-                  <CardTitle className="text-white text-lg flex items-center gap-2">
+                  <CardTitle className="text-gray-800 text-lg flex items-center gap-2">
                     <Settings className="w-5 h-5" />
                     Room Details
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <label className="block text-white/70 text-sm mb-1">Room Code</label>
+                    <label className="block text-gray-600 text-sm mb-1">Room Code</label>
                     <div className="flex items-center gap-2">
                       <Input
                         value={roomCode}
                         readOnly
-                        className="bg-white/10 border-white/30 text-white font-mono text-center"
+                        className="bg-gray-50 border-gray-300 text-gray-800 font-mono text-center"
                       />
                       <Button
                         size="sm"
@@ -146,8 +146,8 @@ const Lobby = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-white/70 text-sm mb-1">Join Link</label>
-                    <div className="p-2 bg-white/5 rounded border border-white/20 text-white/70 text-xs break-all">
+                    <label className="block text-gray-600 text-sm mb-1">Join Link</label>
+                    <div className="p-2 bg-gray-50 rounded border border-gray-200 text-gray-600 text-xs break-all">
                       {joinLink}
                     </div>
                   </div>
@@ -156,7 +156,7 @@ const Lobby = () => {
 
               {/* Host Controls */}
               {isHost && (
-                <Card className="glass-effect border-casino-gold/30">
+                <Card className="bg-white border-gray-200 shadow-xl">
                   <CardContent className="p-4">
                     <Button
                       onClick={handleStartGame}
@@ -173,15 +173,15 @@ const Lobby = () => {
 
             {/* Players List */}
             <div className="lg:col-span-2">
-              <Card className="glass-effect border-casino-gold/30">
+              <Card className="bg-white border-gray-200 shadow-xl">
                 <CardHeader>
-                  <CardTitle className="text-white text-xl flex items-center justify-between">
+                  <CardTitle className="text-gray-800 text-xl flex items-center justify-between">
                     <span className="flex items-center gap-2">
                       <Users className="w-6 h-6" />
                       Players ({players.length}/{maxPlayers})
                     </span>
                     {players.length < maxPlayers && (
-                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                      <Badge className="bg-blue-500/20 text-blue-600 border-blue-500/30">
                         <UserPlus className="w-3 h-3 mr-1" />
                         Waiting for players...
                       </Badge>
@@ -193,7 +193,7 @@ const Lobby = () => {
                   {players.map((player, index) => (
                     <div
                       key={player.id}
-                      className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10"
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-casino-gold to-casino-gold-dark flex items-center justify-center">
@@ -203,15 +203,15 @@ const Lobby = () => {
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-white font-medium">{player.name}</span>
+                            <span className="text-gray-800 font-medium">{player.name}</span>
                             {player.isHost && (
                               <Crown className="w-4 h-4 text-casino-gold" />
                             )}
                           </div>
-                          <span className="text-white/50 text-sm">Player {index + 1}</span>
+                          <span className="text-gray-500 text-sm">Player {index + 1}</span>
                         </div>
                       </div>
-                      <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                      <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
                         Ready
                       </Badge>
                     </div>
@@ -221,14 +221,14 @@ const Lobby = () => {
                   {Array.from({ length: maxPlayers - players.length }).map((_, index) => (
                     <div
                       key={`empty-${index}`}
-                      className="flex items-center gap-3 p-4 bg-white/5 rounded-lg border border-dashed border-white/20"
+                      className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300"
                     >
-                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                        <UserPlus className="w-5 h-5 text-white/40" />
+                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                        <UserPlus className="w-5 h-5 text-gray-400" />
                       </div>
                       <div>
-                        <span className="text-white/40 font-medium">Waiting for player...</span>
-                        <div className="text-white/30 text-sm">Player {players.length + index + 1}</div>
+                        <span className="text-gray-400 font-medium">Waiting for player...</span>
+                        <div className="text-gray-300 text-sm">Player {players.length + index + 1}</div>
                       </div>
                     </div>
                   ))}

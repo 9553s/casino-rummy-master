@@ -40,13 +40,13 @@ const Friends = () => {
 
   const renderMainView = () => (
     <div className="space-y-6">
-      <Card className="glass-effect border-casino-gold/30 hover:border-casino-gold transition-all duration-300">
+      <Card className="bg-white border-gray-200 hover:border-blue-400 hover:shadow-xl transition-all duration-300">
         <CardContent className="p-8 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
             <Hash className="w-8 h-8 text-white" />
           </div>
-          <h3 className="text-2xl font-bold text-white mb-2">Join Room with Code</h3>
-          <p className="text-white/70 mb-6">Enter a room code to join your friends</p>
+          <h3 className="text-2xl font-bold text-gray-800 mb-2">Join Room with Code</h3>
+          <p className="text-gray-600 mb-6">Enter a room code to join your friends</p>
           <Button 
             onClick={() => setView('join')}
             className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3"
@@ -56,13 +56,13 @@ const Friends = () => {
         </CardContent>
       </Card>
 
-      <Card className="glass-effect border-casino-gold/30 hover:border-casino-gold transition-all duration-300">
+      <Card className="bg-white border-gray-200 hover:border-casino-gold hover:shadow-xl transition-all duration-300">
         <CardContent className="p-8 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-casino-gold to-casino-gold-dark flex items-center justify-center">
             <Plus className="w-8 h-8 text-black" />
           </div>
-          <h3 className="text-2xl font-bold text-white mb-2">Create Room</h3>
-          <p className="text-white/70 mb-6">Set up a new room for your friends</p>
+          <h3 className="text-2xl font-bold text-gray-800 mb-2">Create Room</h3>
+          <p className="text-gray-600 mb-6">Set up a new room for your friends</p>
           <Button 
             onClick={() => setView('settings')}
             className="w-full bg-casino-gold hover:bg-casino-gold-dark text-black font-semibold py-3"
@@ -75,18 +75,18 @@ const Friends = () => {
   );
 
   const renderJoinView = () => (
-    <Card className="glass-effect border-casino-gold/30">
+    <Card className="bg-white border-gray-200 shadow-xl">
       <CardHeader>
-        <CardTitle className="text-white text-center text-2xl">Join Room</CardTitle>
+        <CardTitle className="text-gray-800 text-center text-2xl">Join Room</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-          <label className="block text-white/80 mb-2 font-medium">Room Code</label>
+          <label className="block text-gray-700 mb-2 font-medium">Room Code</label>
           <Input
             placeholder="Enter room code (e.g., RMY123)"
             value={roomCode}
             onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-            className="bg-white/10 border-white/30 text-white placeholder:text-white/50 text-center text-lg font-mono"
+            className="bg-gray-50 border-gray-300 text-gray-800 placeholder:text-gray-500 text-center text-lg font-mono"
             maxLength={6}
           />
         </div>
@@ -102,16 +102,16 @@ const Friends = () => {
   );
 
   const renderSettingsView = () => (
-    <Card className="glass-effect border-casino-gold/30">
+    <Card className="bg-white border-gray-200 shadow-xl">
       <CardHeader>
-        <CardTitle className="text-white text-center text-2xl flex items-center justify-center gap-2">
+        <CardTitle className="text-gray-800 text-center text-2xl flex items-center justify-center gap-2">
           <Settings className="w-6 h-6" />
           Room Settings
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-          <label className="block text-white/80 mb-3 font-medium">Number of Players</label>
+          <label className="block text-gray-700 mb-3 font-medium">Number of Players</label>
           <div className="grid grid-cols-5 gap-2">
             {[2, 3, 4, 5, 6].map((num) => (
               <Button
@@ -121,7 +121,7 @@ const Friends = () => {
                 className={`
                   ${playerCount === num 
                     ? 'bg-casino-gold text-black hover:bg-casino-gold-dark' 
-                    : 'border-white/30 text-white hover:bg-white/10'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
                   }
                 `}
               >
@@ -132,7 +132,7 @@ const Friends = () => {
         </div>
 
         <div>
-          <label className="block text-white/80 mb-3 font-medium">Paper Joker</label>
+          <label className="block text-gray-700 mb-3 font-medium">Paper Joker</label>
           <div className="grid grid-cols-2 gap-2">
             <Button
               variant={paperJoker ? "default" : "outline"}
@@ -140,7 +140,7 @@ const Friends = () => {
               className={`
                 ${paperJoker 
                   ? 'bg-green-500 text-white hover:bg-green-600' 
-                  : 'border-white/30 text-white hover:bg-white/10'
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-100'
                 }
               `}
             >
@@ -152,7 +152,7 @@ const Friends = () => {
               className={`
                 ${!paperJoker 
                   ? 'bg-red-500 text-white hover:bg-red-600' 
-                  : 'border-white/30 text-white hover:bg-white/10'
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-100'
                 }
               `}
             >
@@ -175,7 +175,7 @@ const Friends = () => {
     <div className="min-h-screen casino-bg relative overflow-hidden">
       {/* Guest ID Display */}
       <div className="absolute top-4 right-4 z-10">
-        <Badge variant="secondary" className="bg-white/20 text-white border-white/30 px-4 py-2 text-sm font-medium">
+        <Badge variant="secondary" className="bg-white text-gray-800 border-gray-300 px-4 py-2 text-sm font-medium shadow-lg">
           <Users className="w-4 h-4 mr-2" />
           {guestId}
         </Badge>
@@ -186,7 +186,7 @@ const Friends = () => {
         <Button
           onClick={handleBack}
           variant="outline"
-          className="border-white/30 text-white hover:bg-white/10"
+          className="bg-white border-gray-300 text-gray-800 hover:bg-gray-100 shadow-lg"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
