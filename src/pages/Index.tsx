@@ -45,7 +45,7 @@ const Index = () => {
 
       {/* Guest ID Display */}
       <div className="absolute top-6 right-6 z-10">
-        <Badge variant="secondary" className="glass-effect text-white border-white/20 px-6 py-3 text-base font-semibold backdrop-blur-md">
+        <Badge variant="secondary" className="glass-effect text-white-contrast border-white/20 px-6 py-3 text-base font-semibold backdrop-blur-md">
           <Users className="w-5 h-5 mr-2" />
           {guestId}
         </Badge>
@@ -66,8 +66,8 @@ const Index = () => {
                 <Club className="w-10 h-10 text-white drop-shadow-lg" />
               </div>
             </div>
-            <p className="text-2xl text-white/90 font-semibold tracking-wide">Master the Game of Cards</p>
-            <div className="mt-4 flex items-center justify-center gap-6 text-casino-gold/80">
+            <p className="text-2xl text-white-contrast font-semibold tracking-wide">Master the Game of Cards</p>
+            <div className="mt-4 flex items-center justify-center gap-6 text-casino-gold-contrast">
               <span className="flex items-center gap-1 text-sm">
                 <Star className="w-4 h-4" />
                 Premium Experience
@@ -89,12 +89,12 @@ const Index = () => {
                   <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-casino-gold via-casino-gold-light to-casino-gold-dark flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-shadow duration-500">
                     <Bot className="w-12 h-12 text-black" />
                   </div>
-                  <h3 className="text-3xl font-bold text-white mb-3 group-hover:text-casino-gold transition-colors duration-300">Player vs Bot</h3>
-                  <p className="text-white/80 text-base leading-relaxed">Challenge our intelligent AI opponent and sharpen your skills</p>
+                  <h3 className="text-3xl font-bold text-white-contrast mb-3 group-hover:text-casino-gold-contrast transition-colors duration-300">Player vs Bot</h3>
+                  <p className="text-white/90 text-base leading-relaxed">Challenge our intelligent AI opponent and sharpen your skills</p>
                 </div>
                 <Button 
                   onClick={handlePlayerVsBot}
-                  className="w-full premium-button text-black font-bold py-4 rounded-xl text-lg shadow-lg group-hover:shadow-xl transition-all duration-300"
+                  className="w-full premium-button font-bold py-4 rounded-xl text-lg shadow-lg group-hover:shadow-xl transition-all duration-300"
                 >
                   <Bot className="w-5 h-5 mr-2" />
                   Start Challenge
@@ -110,8 +110,8 @@ const Index = () => {
                   <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-green-400 via-green-500 to-green-600 flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-shadow duration-500">
                     <Zap className="w-12 h-12 text-white" />
                   </div>
-                  <h3 className="text-3xl font-bold text-white mb-3 group-hover:text-green-400 transition-colors duration-300">Quick Join</h3>
-                  <p className="text-white/80 text-base leading-relaxed">Jump into any available room instantly and start playing</p>
+                  <h3 className="text-3xl font-bold text-white-contrast mb-3 group-hover:text-green-400 transition-colors duration-300">Quick Join</h3>
+                  <p className="text-white/90 text-base leading-relaxed">Jump into any available room instantly and start playing</p>
                 </div>
                 <Button 
                   onClick={handleQuickJoin}
@@ -131,8 +131,8 @@ const Index = () => {
                   <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-400 via-purple-500 to-purple-600 flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-shadow duration-500">
                     <Crown className="w-12 h-12 text-white" />
                   </div>
-                  <h3 className="text-3xl font-bold text-white mb-3 group-hover:text-purple-400 transition-colors duration-300">Play with Friends</h3>
-                  <p className="text-white/80 text-base leading-relaxed">Create private rooms and invite your friends to play</p>
+                  <h3 className="text-3xl font-bold text-white-contrast mb-3 group-hover:text-purple-400 transition-colors duration-300">Play with Friends</h3>
+                  <p className="text-white/90 text-base leading-relaxed">Create private rooms and invite your friends to play</p>
                 </div>
                 <Button 
                   onClick={handlePlayWithFriends}
@@ -148,10 +148,10 @@ const Index = () => {
           {/* Footer Info */}
           <div className="text-center mt-16">
             <div className="glass-effect rounded-2xl px-8 py-6 max-w-2xl mx-auto border border-white/10">
-              <p className="text-white/90 text-lg font-medium mb-2">
+              <p className="text-white-contrast text-lg font-medium mb-2">
                 🎯 2-6 Players • 🃏 13 Cards • 🎲 Indian Rummy Rules
               </p>
-              <p className="text-white/70 text-sm">
+              <p className="text-white/80 text-sm">
                 Experience the ultimate card game with stunning visuals and smooth gameplay
               </p>
             </div>
