@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -12,9 +11,9 @@ import {
   RotateCcw,
   CheckCircle,
   Trophy,
-  Settings,
   HelpCircle,
-  X
+  X,
+  Shuffle
 } from 'lucide-react';
 
 interface GameCard {
@@ -43,6 +42,8 @@ const Game = () => {
   const [turnTimer, setTurnTimer] = useState(30);
   const [currentTurn, setCurrentTurn] = useState(0);
   const [showRules, setShowRules] = useState(false);
+  const [isLandscape, setIsLandscape] = useState(false);
+  const [draggedCard, setDraggedCard] = useState<string | null>(null);
   
   // Sample hand of 13 cards
   const [hand, setHand] = useState<GameCard[]>([
@@ -77,7 +78,6 @@ const Game = () => {
         { id: 'player3', name: 'Player3', cardCount: 13, isCurrentTurn: false, position: 2 }
       ];
     } else {
-      // Default multiplayer setup
       return [
         basePlayer,
         { id: 'guest5678', name: 'Guest5678', cardCount: 13, isCurrentTurn: false, position: 1 },
@@ -90,6 +90,21 @@ const Game = () => {
 
   const [discardPile] = useState<GameCard>({ suit: 'hearts', rank: 'K', id: 'discard' });
   const [jokerCard] = useState<GameCard>({ suit: 'diamonds', rank: '7', id: 'joker' });
+
+  useEffect(() => {
+    const checkOrientation = () => {
+      setIsLandscape(window.innerWidth > window.innerHeight);
+    };
+
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
+    };
+  }, []);
 
   // Timer countdown
   useEffect(() => {
@@ -111,6 +126,38 @@ const Game = () => {
         ? prev.filter(id => id !== cardId)
         : [...prev, cardId]
     );
+  };
+
+  const handleCardDragStart = (e: React.DragEvent, cardId: string) => {
+    setDraggedCard(cardId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleCardDragEnd = () => {
+    setDraggedCard(null);
+  };
+
+  const handleCardDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleCardDrop = (e: React.DragEvent, targetCardId: string) => {
+    e.preventDefault();
+    const draggedCardId = e.dataTransfer.getData('text/plain') || draggedCard;
+    
+    if (draggedCardId && draggedCardId !== targetCardId) {
+      const draggedIndex = hand.findIndex(card => card.id === draggedCardId);
+      const targetIndex = hand.findIndex(card => card.id === targetCardId);
+      
+      if (draggedIndex !== -1 && targetIndex !== -1) {
+        const newHand = [...hand];
+        const [draggedCard] = newHand.splice(draggedIndex, 1);
+        newHand.splice(targetIndex, 0, draggedCard);
+        setHand(newHand);
+      }
+    }
+    setDraggedCard(null);
   };
 
   const handleArrange = () => {
@@ -154,28 +201,27 @@ const Game = () => {
 
   const GameRulesModal = () => (
     showRules && (
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl">
-          <div className="sticky top-0 bg-white border-b p-4 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-800">Game Rules</h2>
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl border-4 border-casino-gold">
+          <div className="sticky top-0 bg-white border-b-4 border-gray-200 p-4 flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-900">Game Controls & Rules</h2>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowRules(false)}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
             >
               <X className="w-5 h-5" />
             </Button>
           </div>
-          <div className="p-6 space-y-4 text-gray-700">
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Quick Controls</h3>
-              <ul className="list-disc list-inside space-y-1">
-                <li>Click cards to select them</li>
-                <li>Use "Arrange Cards" to auto-sort your hand</li>
-                <li>Draw from deck or discard pile on your turn</li>
-                <li>Select 1 card and click "Discard" to end turn</li>
-                <li>Click "Declare" when you have valid combinations</li>
+          <div className="p-6 space-y-4 text-gray-800">
+            <div className="bg-blue-50 p-4 rounded-lg border-4 border-blue-200">
+              <h3 className="font-bold text-lg mb-2 text-gray-900">Game Controls</h3>
+              <ul className="list-disc list-inside space-y-1 text-gray-800">
+                <li><strong>Drag & Drop:</strong> Drag cards to rearrange your hand</li>
+                <li><strong>Click to Select:</strong> Click cards to select/deselect them</li>
+                <li><strong>Arrange Cards:</strong> Auto-sort by suit and rank</li>
+                <li><strong>Draw/Discard:</strong> Pick from deck or discard pile, then discard one card</li>
               </ul>
             </div>
             <div>
@@ -193,25 +239,23 @@ const Game = () => {
   );
 
   return (
-    <div className="min-h-screen casino-bg relative overflow-hidden">
+    <div className={`min-h-screen casino-bg relative overflow-hidden ${isLandscape && window.innerWidth < 768 ? 'force-landscape' : ''}`}>
       {/* Game Header */}
-      <div className="absolute top-0 left-0 right-0 z-20 bg-black/60 backdrop-blur-md border-b border-casino-gold/30">
+      <div className="absolute top-0 left-0 right-0 z-20 bg-black/80 backdrop-blur-md border-b-4 border-casino-gold/50">
         <div className="flex items-center justify-between p-3">
           <div className="flex items-center gap-3">
             <Button
               onClick={() => navigate('/')}
-              variant="outline"
-              size="sm"
-              className="bg-white/90 border-gray-300 text-gray-800 hover:bg-gray-100 shadow-lg"
+              className="bg-white text-gray-900 hover:bg-gray-100 border-2 border-gray-300 shadow-xl font-bold"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
               Exit
             </Button>
-            <Badge className="bg-casino-gold text-black font-semibold px-3 py-1 shadow-lg">
+            <Badge className="bg-casino-gold text-black font-bold px-4 py-2 shadow-xl border-2 border-yellow-600">
               {roomCode}
             </Badge>
             {gameMode && (
-              <Badge className="bg-blue-500/80 text-white px-3 py-1">
+              <Badge className="bg-blue-600 text-white px-4 py-2 font-bold border-2 border-blue-400">
                 {gameMode === 'bot' ? 'vs AI' : gameMode === 'quick' ? 'Quick Match' : 'Multiplayer'}
               </Badge>
             )}
@@ -220,18 +264,16 @@ const Game = () => {
           <div className="flex items-center gap-3">
             <Button
               onClick={() => setShowRules(true)}
-              variant="outline"
-              size="sm"
-              className="bg-white/90 border-casino-gold text-casino-gold hover:bg-casino-gold hover:text-black"
+              className="bg-white text-casino-gold hover:bg-casino-gold hover:text-black border-2 border-casino-gold font-bold"
             >
               <HelpCircle className="w-4 h-4 mr-1" />
               Rules
             </Button>
-            <Badge className="bg-red-500/80 text-red-100 border-red-500/50 px-3 py-1 shadow-lg">
+            <Badge className="bg-red-600 text-white border-2 border-red-400 px-4 py-2 shadow-xl font-bold">
               <Timer className="w-3 h-3 mr-1" />
               {turnTimer}s
             </Badge>
-            <Badge variant="secondary" className="bg-white/90 text-gray-800 border-gray-300 px-3 py-1 shadow-lg">
+            <Badge className="bg-white text-gray-900 border-2 border-gray-300 px-4 py-2 shadow-xl font-bold">
               <Users className="w-4 h-4 mr-1" />
               {guestId}
             </Badge>
@@ -240,36 +282,51 @@ const Game = () => {
       </div>
 
       {/* Game Table */}
-      <div className="pt-16 pb-4 px-4 h-screen flex flex-col">
-        {/* Opponents - Compact Display */}
+      <div className="pt-20 pb-4 px-4 h-screen flex flex-col">
+        {/* Opponents - Compact Display with better grouping */}
         <div className="flex justify-center mb-4">
-          <div className="grid grid-cols-4 gap-4 max-w-4xl">
+          <div className="flex gap-6 max-w-6xl flex-wrap justify-center">
             {players.filter(p => p.id !== 'guest1234').map((player, index) => (
               <div key={player.id} className="text-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-casino-gold border-2 border-white flex items-center justify-center shadow-lg">
-                    <span className="text-black font-bold text-xs">
+                  <div className="w-10 h-10 rounded-full bg-casino-gold border-4 border-white flex items-center justify-center shadow-xl">
+                    <span className="text-black font-bold text-sm">
                       {player.name.charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  <div className="bg-white/90 rounded px-2 py-1 shadow-lg">
-                    <span className="text-gray-800 text-xs font-semibold">{player.name}</span>
+                  <div className="bg-white rounded-lg px-3 py-2 shadow-xl border-2 border-gray-300">
+                    <span className="text-gray-900 text-sm font-bold">{player.name}</span>
                     {player.isCurrentTurn && (
-                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse inline-block ml-1" />
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse inline-block ml-2" />
                     )}
                   </div>
                 </div>
                 <div className="flex justify-center">
-                  {/* Grouped cards display */}
+                  {/* Stacked cards display for space efficiency */}
                   <div className="relative">
+                    {/* Background cards for stacking effect */}
                     <PlayingCard
                       suit="spades"
                       rank="A"
                       faceDown
                       size="sm"
-                      className="shadow-lg"
+                      className="absolute top-1 left-1 shadow-lg"
                     />
-                    <div className="absolute -right-2 -top-1 bg-casino-gold text-black text-xs font-bold px-1.5 py-0.5 rounded-full shadow">
+                    <PlayingCard
+                      suit="spades"
+                      rank="A"
+                      faceDown
+                      size="sm"
+                      className="absolute top-0.5 left-0.5 shadow-lg"
+                    />
+                    <PlayingCard
+                      suit="spades"
+                      rank="A"
+                      faceDown
+                      size="sm"
+                      className="relative shadow-xl z-10"
+                    />
+                    <div className="absolute -right-2 -top-2 bg-casino-gold text-black text-xs font-bold px-2 py-1 rounded-full shadow-xl border-2 border-white z-20">
                       {player.cardCount}
                     </div>
                   </div>
@@ -280,17 +337,17 @@ const Game = () => {
         </div>
 
         {/* Casino Table Central Area */}
-        <div className="flex-1 flex items-center justify-center mb-4">
+        <div className="flex-1 flex items-center justify-center mb-6">
           <div className="felt-table rounded-[3rem] p-8 max-w-4xl w-full relative">
-            <div className="absolute inset-4 border-2 border-casino-gold/20 rounded-[2.5rem] pointer-events-none"></div>
-            <div className="absolute top-6 left-1/2 transform -translate-x-1/2 text-casino-gold text-lg font-bold opacity-30">
+            <div className="absolute inset-4 border-4 border-casino-gold/30 rounded-[2.5rem] pointer-events-none"></div>
+            <div className="absolute top-8 left-1/2 transform -translate-x-1/2 text-casino-gold text-2xl font-bold opacity-40 drop-shadow-lg">
               RUMMY ROYAL
             </div>
             
-            <div className="flex items-center justify-center gap-8">
+            <div className="flex items-center justify-center gap-12">
               {/* Deck */}
               <div className="text-center group">
-                <div className="mb-3 relative">
+                <div className="mb-4 relative">
                   <PlayingCard
                     suit="spades"
                     rank="A"
@@ -299,37 +356,37 @@ const Game = () => {
                     onClick={handleDrawCard}
                     className={`${isMyTurn ? 'hover:scale-110 cursor-pointer shadow-2xl' : 'cursor-not-allowed opacity-60'} transition-all duration-300`}
                   />
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-casino-gold rounded-full flex items-center justify-center text-black text-xs font-bold">
+                  <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-casino-gold rounded-full flex items-center justify-center text-black text-sm font-bold border-2 border-white shadow-xl">
                     52
                   </div>
                 </div>
-                <div className="bg-white/90 rounded px-3 py-1 shadow-lg">
-                  <span className="text-gray-800 font-bold text-sm">DECK</span>
+                <div className="bg-white rounded-lg px-4 py-2 shadow-xl border-2 border-gray-300">
+                  <span className="text-gray-900 font-bold text-sm">DECK</span>
                 </div>
               </div>
 
               {/* Joker */}
               <div className="text-center group">
-                <div className="mb-3 relative">
+                <div className="mb-4 relative">
                   <PlayingCard
                     suit={jokerCard.suit}
                     rank={jokerCard.rank}
                     size="md"
                     isJoker
-                    className="shadow-2xl ring-4 ring-casino-gold/50"
+                    className="shadow-2xl ring-4 ring-casino-gold/70"
                   />
-                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-casino-gold text-black px-2 py-0.5 rounded-full text-xs font-bold">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-casino-gold text-black px-3 py-1 rounded-full text-sm font-bold border-2 border-white shadow-xl">
                     JOKER
                   </div>
                 </div>
-                <div className="bg-casino-gold rounded px-3 py-1 shadow-lg">
+                <div className="bg-casino-gold rounded-lg px-4 py-2 shadow-xl border-2 border-yellow-600">
                   <span className="text-black font-bold text-sm">WILD</span>
                 </div>
               </div>
 
               {/* Discard Pile */}
               <div className="text-center group">
-                <div className="mb-3 relative">
+                <div className="mb-4 relative">
                   <PlayingCard
                     suit={discardPile.suit}
                     rank={discardPile.rank}
@@ -338,23 +395,22 @@ const Game = () => {
                     className={`${isMyTurn ? 'hover:scale-110 cursor-pointer shadow-2xl' : 'cursor-not-allowed opacity-60'} transition-all duration-300`}
                   />
                 </div>
-                <div className="bg-white/90 rounded px-3 py-1 shadow-lg">
-                  <span className="text-gray-800 font-bold text-sm">DISCARD</span>
+                <div className="bg-white rounded-lg px-4 py-2 shadow-xl border-2 border-gray-300">
+                  <span className="text-gray-900 font-bold text-sm">DISCARD</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Player Hand Area - Improved */}
+        {/* Player Hand Area - Improved with overlapping cards */}
         <div className="space-y-4">
           {/* Action Buttons */}
-          <div className="flex justify-center gap-3">
+          <div className="flex justify-center gap-4">
             <Button
               onClick={handleArrange}
               disabled={hasArranged}
-              size="sm"
-              className="bg-white text-gray-800 hover:bg-gray-100 disabled:bg-gray-300 border-2 border-gray-300 shadow-lg font-semibold"
+              className="bg-white text-gray-900 hover:bg-gray-100 disabled:bg-gray-400 disabled:text-gray-600 border-2 border-gray-300 shadow-xl font-bold"
             >
               <RotateCcw className="w-4 h-4 mr-1" />
               {hasArranged ? 'Arranged' : 'Arrange'}
@@ -363,8 +419,7 @@ const Game = () => {
             <Button
               onClick={handleDiscard}
               disabled={!isMyTurn || selectedCards.length !== 1}
-              size="sm"
-              className="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white shadow-lg font-semibold"
+              className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 disabled:text-gray-600 text-white shadow-xl font-bold border-2 border-orange-500"
             >
               Discard ({selectedCards.length})
             </Button>
@@ -372,28 +427,40 @@ const Game = () => {
             <Button
               onClick={handleDeclare}
               disabled={!isMyTurn}
-              size="sm"
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white shadow-lg font-semibold"
+              className="bg-green-700 hover:bg-green-800 disabled:bg-gray-400 disabled:text-gray-600 text-white shadow-xl font-bold border-2 border-green-600"
             >
               <Trophy className="w-4 h-4 mr-1" />
               Declare
             </Button>
           </div>
 
-          {/* Hand Cards - Improved spacing and visibility */}
+          {/* Hand Cards - Overlapping for space efficiency */}
           <div className="flex justify-center">
-            <div className="flex gap-2 max-w-full overflow-x-auto pb-2 px-4" style={{ scrollbarWidth: 'thin' }}>
+            <div className="relative flex" style={{ width: 'fit-content' }}>
               {hand.map((card, index) => (
-                <PlayingCard
+                <div
                   key={card.id}
-                  suit={card.suit}
-                  rank={card.rank}
-                  isSelected={selectedCards.includes(card.id)}
-                  onClick={() => handleCardSelect(card.id)}
-                  size="md"
-                  className="flex-shrink-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                />
+                  className="relative"
+                  style={{ 
+                    marginLeft: index > 0 ? '-2rem' : '0',
+                    zIndex: selectedCards.includes(card.id) ? 30 : 20 - index
+                  }}
+                >
+                  <PlayingCard
+                    suit={card.suit}
+                    rank={card.rank}
+                    isSelected={selectedCards.includes(card.id)}
+                    onClick={() => handleCardSelect(card.id)}
+                    onDragStart={(e) => handleCardDragStart(e, card.id)}
+                    onDragEnd={handleCardDragEnd}
+                    onDragOver={handleCardDragOver}
+                    onDrop={(e) => handleCardDrop(e, card.id)}
+                    draggable={true}
+                    cardId={card.id}
+                    size="md"
+                    className="shadow-xl hover:shadow-2xl transition-all duration-300"
+                  />
+                </div>
               ))}
             </div>
           </div>
@@ -401,13 +468,13 @@ const Game = () => {
           {/* Turn Indicator */}
           <div className="text-center">
             {isMyTurn ? (
-              <div className="bg-green-500 text-white font-bold px-4 py-2 rounded-full shadow-xl inline-flex items-center gap-2">
-                <CheckCircle className="w-4 h-4" />
+              <div className="bg-green-600 text-white font-bold px-6 py-3 rounded-full shadow-xl inline-flex items-center gap-2 border-4 border-green-400">
+                <CheckCircle className="w-5 h-5" />
                 Your Turn - Make Your Move!
               </div>
             ) : (
-              <div className="bg-white/90 text-gray-800 px-4 py-2 rounded-full shadow-xl inline-flex items-center gap-2 border-2 border-gray-300">
-                <Timer className="w-4 h-4" />
+              <div className="bg-white text-gray-900 px-6 py-3 rounded-full shadow-xl inline-flex items-center gap-2 border-4 border-gray-300 font-bold">
+                <Timer className="w-5 h-5" />
                 Waiting for {currentPlayer?.name}
               </div>
             )}
