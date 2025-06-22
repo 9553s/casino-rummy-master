@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -38,7 +37,7 @@ const Game = () => {
   const gameMode = searchParams.get('mode');
   
   const [guestId] = useState('Guest1234');
-  const [selectedCards, setSelectedCards] = useState<string[]>([]);
+  const [selectedCard, setSelectedCard] = useState<string | null>(null); // Changed to single card selection
   const [hasArranged, setHasArranged] = useState(false);
   const [turnTimer, setTurnTimer] = useState(30);
   const [currentTurn, setCurrentTurn] = useState(0);
@@ -121,12 +120,22 @@ const Game = () => {
     return () => clearInterval(timer);
   }, [currentTurn]);
 
+  // Handle click outside to deselect card
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.playing-card') && !target.closest('.game-button')) {
+        setSelectedCard(null);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   const handleCardSelect = (cardId: string) => {
-    setSelectedCards(prev => 
-      prev.includes(cardId) 
-        ? prev.filter(id => id !== cardId)
-        : [...prev, cardId]
-    );
+    // Only allow one card selection at a time
+    setSelectedCard(prev => prev === cardId ? null : cardId);
   };
 
   const handleCardDragStart = (e: React.DragEvent, cardId: string) => {
@@ -187,9 +196,9 @@ const Game = () => {
   };
 
   const handleDiscard = () => {
-    if (selectedCards.length === 1) {
-      console.log('Discarding card:', selectedCards[0]);
-      setSelectedCards([]);
+    if (selectedCard) {
+      console.log('Discarding card:', selectedCard);
+      setSelectedCard(null);
     }
   };
 
@@ -219,8 +228,8 @@ const Game = () => {
             <div className="bg-blue-50 p-4 rounded-lg border-4 border-blue-200">
               <h3 className="font-bold text-lg mb-2 text-gray-900">Game Controls</h3>
               <ul className="list-disc list-inside space-y-1 text-gray-800">
+                <li><strong>Single Card Selection:</strong> Click to select one card at a time</li>
                 <li><strong>Drag & Drop:</strong> Drag cards to rearrange your hand</li>
-                <li><strong>Click to Select:</strong> Click cards to select/deselect them</li>
                 <li><strong>Arrange Cards:</strong> Auto-sort by suit and rank</li>
                 <li><strong>Draw/Discard:</strong> Pick from deck or discard pile, then discard one card</li>
               </ul>
@@ -265,7 +274,7 @@ const Game = () => {
           <div className="flex items-center gap-3">
             <Button
               onClick={() => setShowRules(true)}
-              className="bg-white text-casino-gold hover:bg-casino-gold hover:text-black border-2 border-casino-gold font-bold"
+              className="bg-white text-casino-gold hover:bg-casino-gold hover:text-black border-2 border-casino-gold font-bold game-button"
             >
               <HelpCircle className="w-4 h-4 mr-1" />
               Rules
@@ -282,17 +291,17 @@ const Game = () => {
         </div>
       </div>
 
-      {/* Turn Indicator - Moved to top right */}
+      {/* Turn Indicator - Top right with bigger size */}
       <div className="absolute top-24 right-4 z-30">
         {isMyTurn ? (
-          <div className="bg-green-600 text-white font-bold px-8 py-4 rounded-full shadow-xl flex items-center gap-3 border-4 border-green-400 text-xl">
-            <CheckCircle className="w-6 h-6" />
-            Your Turn - Make Your Move!
+          <div className="bg-green-600 text-white font-bold px-8 py-4 rounded-full shadow-xl flex items-center gap-3 border-4 border-green-400 text-2xl">
+            <CheckCircle className="w-8 h-8" />
+            Your Turn!
           </div>
         ) : (
-          <div className="bg-white text-gray-900 px-8 py-4 rounded-full shadow-xl flex items-center gap-3 border-4 border-gray-300 font-bold text-xl">
-            <Timer className="w-6 h-6" />
-            Waiting for {currentPlayer?.name}
+          <div className="bg-white text-gray-900 px-8 py-4 rounded-full shadow-xl flex items-center gap-3 border-4 border-gray-300 font-bold text-2xl">
+            <Timer className="w-8 h-8" />
+            Waiting...
           </div>
         )}
       </div>
@@ -368,7 +377,7 @@ const Game = () => {
                     suit="spades"
                     rank="A"
                     faceDown
-                    size="md"
+                    size="lg"
                     onClick={handleDrawCard}
                     className={`${isMyTurn ? 'hover:scale-110 cursor-pointer shadow-2xl' : 'cursor-not-allowed opacity-60'} transition-all duration-300`}
                   />
@@ -387,7 +396,7 @@ const Game = () => {
                   <PlayingCard
                     suit={jokerCard.suit}
                     rank={jokerCard.rank}
-                    size="md"
+                    size="lg"
                     isJoker
                     className="shadow-2xl ring-4 ring-casino-gold/70"
                   />
@@ -406,7 +415,7 @@ const Game = () => {
                   <PlayingCard
                     suit={discardPile.suit}
                     rank={discardPile.rank}
-                    size="md"
+                    size="lg"
                     onClick={handleDrawDiscard}
                     className={`${isMyTurn ? 'hover:scale-110 cursor-pointer shadow-2xl' : 'cursor-not-allowed opacity-60'} transition-all duration-300`}
                   />
@@ -419,14 +428,14 @@ const Game = () => {
           </div>
         </div>
 
-        {/* Player Hand Area - Improved with overlapping cards */}
+        {/* Player Hand Area */}
         <div className="space-y-4">
           {/* Action Buttons */}
           <div className="flex justify-center gap-4">
             <Button
               onClick={handleArrange}
               disabled={hasArranged}
-              className="bg-white text-gray-900 hover:bg-gray-100 disabled:bg-gray-400 disabled:text-gray-600 border-2 border-gray-300 shadow-xl font-bold"
+              className="bg-white text-gray-900 hover:bg-gray-100 disabled:bg-gray-400 disabled:text-gray-600 border-2 border-gray-300 shadow-xl font-bold game-button"
             >
               <RotateCcw className="w-4 h-4 mr-1" />
               {hasArranged ? 'Arranged' : 'Arrange'}
@@ -434,38 +443,39 @@ const Game = () => {
             
             <Button
               onClick={handleDiscard}
-              disabled={!isMyTurn || selectedCards.length !== 1}
-              className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 disabled:text-gray-600 text-white shadow-xl font-bold border-2 border-orange-500"
+              disabled={!isMyTurn || !selectedCard}
+              className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 disabled:text-gray-600 text-white shadow-xl font-bold border-2 border-orange-500 game-button"
             >
-              Discard ({selectedCards.length})
+              Discard {selectedCard ? '(1)' : '(0)'}
             </Button>
             
             <Button
               onClick={handleDeclare}
               disabled={!isMyTurn}
-              className="bg-green-700 hover:bg-green-800 disabled:bg-gray-400 disabled:text-gray-600 text-white shadow-xl font-bold border-2 border-green-600"
+              className="bg-green-700 hover:bg-green-800 disabled:bg-gray-400 disabled:text-gray-600 text-white shadow-xl font-bold border-2 border-green-600 game-button"
             >
               <Trophy className="w-4 h-4 mr-1" />
               Declare
             </Button>
           </div>
 
-          {/* Hand Cards - Overlapping with reversed stacking so numbers are visible */}
+          {/* Hand Cards - Bigger size with upward movement for selected card */}
           <div className="flex justify-center">
             <div className="relative flex" style={{ width: 'fit-content' }}>
               {hand.map((card, index) => (
                 <div
                   key={card.id}
-                  className="relative"
+                  className="relative transition-all duration-300 playing-card"
                   style={{ 
-                    marginLeft: index > 0 ? '-2rem' : '0',
-                    zIndex: selectedCards.includes(card.id) ? 50 : 30 + index // Reversed z-index order
+                    marginLeft: index > 0 ? '-2.5rem' : '0',
+                    zIndex: selectedCard === card.id ? 50 : 30 + index,
+                    transform: selectedCard === card.id ? 'translateY(-20px)' : 'translateY(0px)'
                   }}
                 >
                   <PlayingCard
                     suit={card.suit}
                     rank={card.rank}
-                    isSelected={selectedCards.includes(card.id)}
+                    isSelected={selectedCard === card.id}
                     onClick={() => handleCardSelect(card.id)}
                     onDragStart={(e) => handleCardDragStart(e, card.id)}
                     onDragEnd={handleCardDragEnd}
@@ -473,7 +483,7 @@ const Game = () => {
                     onDrop={(e) => handleCardDrop(e, card.id)}
                     draggable={true}
                     cardId={card.id}
-                    size="md"
+                    size="lg"
                     className="shadow-xl hover:shadow-2xl transition-all duration-300"
                   />
                 </div>
