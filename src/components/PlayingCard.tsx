@@ -55,16 +55,29 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
 
   const isRed = suit === 'hearts' || suit === 'diamonds';
   
+  // Bigger sizes for better mobile experience
   const sizeClasses = {
-    sm: 'w-8 h-12',
-    md: 'w-12 h-16', 
-    lg: 'w-14 h-20'
+    sm: 'w-10 h-14',      // Increased from w-8 h-12
+    md: 'w-16 h-22',      // Increased from w-12 h-16
+    lg: 'w-18 h-26'       // Increased from w-14 h-20
   };
 
   const fontSizes = {
-    sm: 'text-[10px]',
-    md: 'text-xs',
-    lg: 'text-sm'
+    sm: 'text-xs',        // Increased from text-[10px]
+    md: 'text-sm',        // Increased from text-xs
+    lg: 'text-base'       // Increased from text-sm
+  };
+
+  const iconSizes = {
+    sm: 'w-2 h-2',
+    md: 'w-3 h-3', 
+    lg: 'w-4 h-4'
+  };
+
+  const centerIconSizes = {
+    sm: 'w-3 h-3',
+    md: 'w-5 h-5',
+    lg: 'w-6 h-6'
   };
 
   const handleDragStart = (e: React.DragEvent) => {
@@ -106,7 +119,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
       >
         <div className="absolute inset-1 rounded border border-blue-300/40 bg-gradient-to-br from-blue-500/30 to-blue-900/60">
           <div className="w-full h-full flex items-center justify-center">
-            <div className="w-3 h-3 text-blue-200">
+            <div className="w-4 h-4 text-blue-200">
               <Spade className="w-full h-full drop-shadow-lg" />
             </div>
           </div>
@@ -141,13 +154,13 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
       
       {/* Top-left corner */}
       <div className={cn(
-        'absolute top-0.5 left-0.5 flex flex-col items-center z-10',
+        'absolute top-1 left-1 flex flex-col items-center z-10',
         isRed ? 'text-red-600' : 'text-gray-900',
         'drop-shadow-sm font-bold',
         fontSizes[size]
       )}>
         <span className="leading-none">{rank}</span>
-        <div className="w-1.5 h-1.5">
+        <div className={iconSizes[size]}>
           {getSuitIcon(suit)}
         </div>
       </div>
@@ -158,27 +171,27 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
         isRed ? 'text-red-600' : 'text-gray-900',
         'drop-shadow-md'
       )}>
-        <div className="w-4 h-4">
+        <div className={centerIconSizes[size]}>
           {getSuitIcon(suit)}
         </div>
       </div>
 
       {/* Bottom-right corner (rotated) */}
       <div className={cn(
-        'absolute bottom-0.5 right-0.5 flex flex-col-reverse items-center rotate-180 z-10',
+        'absolute bottom-1 right-1 flex flex-col-reverse items-center rotate-180 z-10',
         isRed ? 'text-red-600' : 'text-gray-900',
         'drop-shadow-sm font-bold',
         fontSizes[size]
       )}>
         <span className="leading-none">{rank}</span>
-        <div className="w-1.5 h-1.5">
+        <div className={iconSizes[size]}>
           {getSuitIcon(suit)}
         </div>
       </div>
 
       {/* Joker indicator */}
       {isJoker && (
-        <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full border-2 border-white shadow-lg z-20">
+        <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full border-2 border-white shadow-lg z-20">
           <div className="w-full h-full rounded-full bg-gradient-to-br from-purple-400 to-purple-600"></div>
         </div>
       )}
