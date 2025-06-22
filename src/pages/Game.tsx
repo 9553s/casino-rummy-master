@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -281,6 +282,21 @@ const Game = () => {
         </div>
       </div>
 
+      {/* Turn Indicator - Moved to top right */}
+      <div className="absolute top-24 right-4 z-30">
+        {isMyTurn ? (
+          <div className="bg-green-600 text-white font-bold px-8 py-4 rounded-full shadow-xl flex items-center gap-3 border-4 border-green-400 text-xl">
+            <CheckCircle className="w-6 h-6" />
+            Your Turn - Make Your Move!
+          </div>
+        ) : (
+          <div className="bg-white text-gray-900 px-8 py-4 rounded-full shadow-xl flex items-center gap-3 border-4 border-gray-300 font-bold text-xl">
+            <Timer className="w-6 h-6" />
+            Waiting for {currentPlayer?.name}
+          </div>
+        )}
+      </div>
+
       {/* Game Table */}
       <div className="pt-20 pb-4 px-4 h-screen flex flex-col">
         {/* Opponents - Compact Display with better grouping */}
@@ -434,7 +450,7 @@ const Game = () => {
             </Button>
           </div>
 
-          {/* Hand Cards - Overlapping for space efficiency */}
+          {/* Hand Cards - Overlapping with reversed stacking so numbers are visible */}
           <div className="flex justify-center">
             <div className="relative flex" style={{ width: 'fit-content' }}>
               {hand.map((card, index) => (
@@ -443,7 +459,7 @@ const Game = () => {
                   className="relative"
                   style={{ 
                     marginLeft: index > 0 ? '-2rem' : '0',
-                    zIndex: selectedCards.includes(card.id) ? 30 : 20 - index
+                    zIndex: selectedCards.includes(card.id) ? 50 : 30 + index // Reversed z-index order
                   }}
                 >
                   <PlayingCard
@@ -463,21 +479,6 @@ const Game = () => {
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Turn Indicator */}
-          <div className="text-center">
-            {isMyTurn ? (
-              <div className="bg-green-600 text-white font-bold px-6 py-3 rounded-full shadow-xl inline-flex items-center gap-2 border-4 border-green-400">
-                <CheckCircle className="w-5 h-5" />
-                Your Turn - Make Your Move!
-              </div>
-            ) : (
-              <div className="bg-white text-gray-900 px-6 py-3 rounded-full shadow-xl inline-flex items-center gap-2 border-4 border-gray-300 font-bold">
-                <Timer className="w-5 h-5" />
-                Waiting for {currentPlayer?.name}
-              </div>
-            )}
           </div>
         </div>
       </div>
