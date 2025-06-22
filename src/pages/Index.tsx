@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -36,8 +35,12 @@ const Index = () => {
   };
 
   const handleJoinInstantly = () => {
-    const quickRoomCode = `QCK${Math.floor(100 + Math.random() * 900)}`;
-    navigate(`/game/${quickRoomCode}?mode=quick`);
+    const quickRoomCode = `PUB${Math.floor(100 + Math.random() * 900)}`;
+    navigate(`/game/${quickRoomCode}?mode=public`);
+  };
+
+  const handleCreateRoom = () => {
+    navigate('/friends');
   };
 
   const GameRulesModal = () => (
@@ -59,7 +62,7 @@ const Index = () => {
             <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
               <h3 className="font-bold text-lg mb-2 text-gray-900">Game Controls</h3>
               <ul className="list-disc list-inside space-y-1 text-gray-800">
-                <li><strong>Drag & Drop:</strong> Rearrange cards by dragging them</li>
+                <li><strong>Drag & Drop:</strong> Rearrange cards by dragging</li>
                 <li><strong>Landscape Mode:</strong> App auto-rotates for better card view</li>
                 <li><strong>Select Cards:</strong> Click to select/deselect cards</li>
                 <li><strong>Arrange:</strong> Auto-sort cards by suit and rank</li>
@@ -192,7 +195,7 @@ const Index = () => {
                 </p>
                 <div className="space-y-3">
                   <Button 
-                    onClick={handleJoinRoom}
+                    onClick={handleCreateRoom}
                     className="w-full premium-button font-bold py-3 text-lg shadow-xl hover:shadow-2xl border-2 border-casino-gold"
                   >
                     Create Room
@@ -222,6 +225,31 @@ const Index = () => {
               <Zap className="w-5 h-5 mr-2" />
               Fast Gameplay
             </Badge>
+          </div>
+
+          {/* How to Play Section */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border-2 border-casino-gold/30">
+            <h2 className="text-3xl font-bold text-white mb-4 gold-shimmer">How to Play</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              <div className="space-y-3">
+                <h3 className="text-xl font-bold text-casino-gold">Game Controls</h3>
+                <ul className="space-y-2 text-white font-medium">
+                  <li>• <strong>Drag & Drop:</strong> Rearrange cards by dragging</li>
+                  <li>• <strong>Landscape Mode:</strong> Auto-rotates for better view</li>
+                  <li>• <strong>Select Cards:</strong> Click to select/deselect</li>
+                  <li>• <strong>Arrange:</strong> Auto-sort by suit and rank</li>
+                </ul>
+              </div>
+              <div className="space-y-3">
+                <h3 className="text-xl font-bold text-casino-gold">Winning Strategy</h3>
+                <ul className="space-y-2 text-white font-medium">
+                  <li>• Form at least 2 sequences (1 pure)</li>
+                  <li>• Create sets with same rank cards</li>
+                  <li>• Use jokers wisely for sequences</li>
+                  <li>• Declare when all cards are arranged</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
