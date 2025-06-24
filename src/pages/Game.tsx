@@ -17,6 +17,7 @@ import {
   X,
   LogOut
 } from 'lucide-react';
+import { io, Socket } from 'socket.io-client';
 
 interface GameCard {
   suit: Suit;
@@ -31,6 +32,8 @@ interface Player {
   isCurrentTurn: boolean;
   position: number;
 }
+
+const SOCKET_SERVER_URL = 'http://localhost:4000';
 
 const Game = () => {
   const { roomCode } = useParams();
@@ -47,6 +50,8 @@ const Game = () => {
   const [showScoreBoard, setShowScoreBoard] = useState(false);
   const [hasWithdrawn, setHasWithdrawn] = useState(false);
   const [draggedCard, setDraggedCard] = useState<string | null>(null);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [socket, setSocket] = useState<Socket | null>(null);
   
   // Sample hand of 13 cards
   const [hand, setHand] = useState<GameCard[]>([
@@ -67,7 +72,7 @@ const Game = () => {
 
   // Enhanced player setup based on game mode
   const [players] = useState<Player[]>(() => {
-    const basePlayer = { id: 'guest1234', name: guestId, cardCount: 13, isCurrentTurn: true, position: 0 };
+    const basePlayer = { id: guestId, name: guestId, cardCount: 13, isCurrentTurn: true, position: 0 };
     
     if (gameMode === 'bot') {
       return [
@@ -91,8 +96,49 @@ const Game = () => {
     }
   });
 
-  const [discardPile] = useState<GameCard>({ suit: 'hearts', rank: 'K', id: 'discard' });
+  const [discardPile, setDiscardPile] = useState<GameCard>({ suit: 'hearts', rank: 'K', id: 'discard' });
   const [jokerCard] = useState<GameCard>({ suit: 'diamonds', rank: '7', id: 'joker' });
+
+  // Socket.IO connection
+  useEffect(() => {
+    const newSocket = io(SOCKET_SERVER_URL);
+    setSocket(newSocket);
+
+    newSocket.on('connect', () => {
+      console.log('Connected to socket server');
+      setSocketConnected(true);
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('Disconnected from socket server');
+      setSocketConnected(false);
+    });
+
+    // Listen for game events
+    newSocket.on('gameUpdate', (action) => {
+      // Handle game update actions (draw/discard/turn change)
+      console.log('Game update received:', action);
+    });
+
+    newSocket.on('playerJoined', (player) => {
+      // Handle player joined
+      console.log('Player joined:', player);
+    });
+
+    newSocket.on('playerLeft', (player) => {
+      // Handle player left
+      console.log('Player left:', player);
+    });
+
+    newSocket.on('playerDeclared', ({ playerId }) => {
+      // Handle declaration
+      console.log('Player declared:', playerId);
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
 
   // Timer countdown
   useEffect(() => {
@@ -123,14 +169,65 @@ const Game = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
+  // Basic Rummy Bot Logic
+  useEffect(() => {
+    if (gameMode === 'bot' && players[currentTurn]?.id === 'bot1') {
+      const botDelay = setTimeout(() => {
+        // Simulate bot analyzing hand
+        let botHand = [...hand]; // In real game, botHand would be separate
+        // Try to declare if valid
+        if (isValidRummyHand(botHand, jokerCard)) {
+          setTimeout(() => {
+            if (socket && socketConnected && roomCode) {
+              socket.emit('declare', { roomCode, playerId: 'bot1', hand: botHand });
+            }
+            setShowScoreBoard(true);
+          }, 800);
+          return;
+        }
+        // Otherwise, draw a card (simulate deck)
+        if (socket && socketConnected && roomCode) {
+          socket.emit('gameAction', { roomCode, action: { type: 'draw', source: 'deck', playerId: 'bot1' } });
+        }
+        // Simulate discard (random card)
+        setTimeout(() => {
+          const discardIndex = Math.floor(Math.random() * botHand.length);
+          const discardCard = botHand[discardIndex];
+          if (socket && socketConnected && roomCode) {
+            socket.emit('gameAction', { roomCode, action: { type: 'discard', card: discardCard, playerId: 'bot1' } });
+          }
+        }, 800);
+      }, 1200);
+      return () => clearTimeout(botDelay);
+    }
+  }, [currentTurn, gameMode, players, hasWithdrawn, hand, jokerCard, socketConnected, roomCode, socket]);
+
   const handleCardSelect = (cardId: string) => {
     if (hasWithdrawn) return;
-    setSelectedCard(prev => prev === cardId ? null : cardId);
+    
+    // Toggle selection - if already selected, deselect it
+    if (cardId === selectedCard) {
+      setSelectedCard(null);
+      // Play deselect sound effect if available
+    } else {
+      setSelectedCard(cardId);
+      // Play select sound effect if available
+      
+      // Provide visual feedback
+      const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
+      if (cardElement) {
+        cardElement.classList.add('scale-110');
+        setTimeout(() => {
+          cardElement.classList.remove('scale-110');
+        }, 200);
+      }
+    }
   };
 
   const handleCardDragStart = (e: React.DragEvent, cardId: string) => {
     if (hasWithdrawn) return;
     setDraggedCard(cardId);
+    e.dataTransfer.setData('text/plain', cardId);
     e.dataTransfer.effectAllowed = 'move';
   };
 
@@ -181,27 +278,86 @@ const Game = () => {
   };
 
   const handleDrawCard = () => {
-    if (!hasWithdrawn) {
+    if (!hasWithdrawn && isMyTurn) {
       console.log('Drawing card from deck');
+      // Generate a new card with a unique ID
+      const suits: Suit[] = ['hearts', 'diamonds', 'spades', 'clubs'];
+      const ranks: Rank[] = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+      const newCard: GameCard = {
+        suit: suits[Math.floor(Math.random() * suits.length)],
+        rank: ranks[Math.floor(Math.random() * ranks.length)],
+        id: `card-${Date.now()}`
+      };
+      
+      // Add the new card to hand
+      setHand(prevHand => [...prevHand, newCard]);
+      
+      // Emit socket event
+      if (socket && socketConnected && roomCode) {
+        socket.emit('gameAction', { roomCode, action: { type: 'draw', source: 'deck', playerId: guestId, card: newCard } });
+      }
+      
+      // Move to discard phase
+      setCurrentTurn(prevTurn => prevTurn + 1);
     }
   };
 
   const handleDrawDiscard = () => {
-    if (!hasWithdrawn) {
+    if (!hasWithdrawn && isMyTurn) {
       console.log('Drawing from discard pile');
+      
+      // Add the discard pile card to hand
+      const discardCard = {...discardPile, id: `card-${Date.now()}`};
+      setHand(prevHand => [...prevHand, discardCard]);
+      
+      // Emit socket event
+      if (socket && socketConnected && roomCode) {
+        socket.emit('gameAction', { roomCode, action: { type: 'draw', source: 'discard', playerId: guestId, card: discardCard } });
+      }
+      
+      // Move to discard phase
+      setCurrentTurn(prevTurn => prevTurn + 1);
     }
   };
 
   const handleDiscard = () => {
-    if (selectedCard && !hasWithdrawn) {
+    if (selectedCard && !hasWithdrawn && isMyTurn) {
       console.log('Discarding card:', selectedCard);
-      setSelectedCard(null);
+      
+      // Find the selected card in the hand
+      const cardToDiscard = hand.find(card => card.id === selectedCard);
+      
+      if (cardToDiscard) {
+        // Remove the card from hand
+        setHand(prevHand => prevHand.filter(card => card.id !== selectedCard));
+        
+        // Update the discard pile
+        setDiscardPile(cardToDiscard);
+        
+        // Emit socket event
+        if (socket && socketConnected && roomCode) {
+          socket.emit('gameAction', { roomCode, action: { type: 'discard', card: cardToDiscard, playerId: guestId } });
+        }
+        
+        setSelectedCard(null);
+        
+        // Move to next player's turn
+        setCurrentTurn(prevTurn => prevTurn + 1);
+      }
     }
   };
 
   const handleDeclare = () => {
-    if (!hasWithdrawn) {
-      console.log('Player declares!');
+    if (hasWithdrawn) return;
+    // Validate hand
+    if (isValidRummyHand(hand, jokerCard)) {
+      // Emit declare event
+      if (socket && socketConnected && roomCode) {
+        socket.emit('declare', { roomCode, playerId: guestId, hand });
+      }
+      setShowScoreBoard(true);
+    } else {
+      alert('Invalid hand! You must have at least one pure sequence and one more sequence or set.');
     }
   };
 
@@ -212,7 +368,7 @@ const Game = () => {
   };
 
   const currentPlayer = players.find(p => p.isCurrentTurn);
-  const isMyTurn = currentPlayer?.id === 'guest1234' && !hasWithdrawn;
+  const isMyTurn = currentPlayer?.id === guestId && !hasWithdrawn;
 
   const GameRulesModal = () => (
     showRules && (
@@ -310,6 +466,11 @@ const Game = () => {
             Wait...
           </div>
         )}
+        {isMyTurn && (
+          <div className="text-xs text-white mt-2 bg-black/70 px-3 py-1 rounded-full text-center">
+            Draw a card, then discard one
+          </div>
+        )}
       </div>
 
       {/* Game Layout - Ultra Responsive */}
@@ -317,7 +478,7 @@ const Game = () => {
         {/* Opponents - Ultra Compact */}
         <div className="flex justify-center">
           <div className="flex gap-3 flex-wrap justify-center">
-            {players.filter(p => p.id !== 'guest1234').map((player) => (
+            {players.filter(p => p.id !== guestId).map((player) => (
               <div key={player.id} className="text-center">
                 <div className="flex items-center gap-1 mb-1">
                   <div className="w-6 h-6 rounded-full bg-casino-gold border-2 border-white flex items-center justify-center shadow-lg">
@@ -367,8 +528,13 @@ const Game = () => {
                     className={`${isMyTurn ? 'hover:scale-110 cursor-pointer shadow-2xl' : 'cursor-not-allowed opacity-60'} transition-all duration-300`}
                   />
                   <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-casino-gold rounded-full flex items-center justify-center text-black text-xs font-bold border border-white shadow-lg">
-                    52
+                    {52 - (players.reduce((total, player) => total + player.cardCount, 0) + 1)} {/* 52 cards - (all player cards + joker) */}
                   </div>
+                  {isMyTurn && (
+                    <div className="absolute -top-6 left-0 right-0 text-center text-xs font-bold text-white bg-green-600 rounded-full px-2 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      Draw
+                    </div>
+                  )}
                 </div>
                 <div className="bg-white rounded px-2 py-1 shadow-lg border border-gray-300">
                   <span className="text-gray-900 font-bold text-xs">DECK</span>
@@ -383,7 +549,7 @@ const Game = () => {
                     rank={jokerCard.rank}
                     size="lg"
                     isJoker
-                    className="shadow-2xl ring-2 ring-casino-gold/70"
+                    className="shadow-2xl ring-2 ring-casino-gold/70 hover:scale-105 transition-all duration-300"
                   />
                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-casino-gold text-black px-2 py-0.5 rounded-full text-xs font-bold border border-white shadow-lg">
                     JOKER
@@ -404,6 +570,11 @@ const Game = () => {
                     onClick={handleDrawDiscard}
                     className={`${isMyTurn ? 'hover:scale-110 cursor-pointer shadow-2xl' : 'cursor-not-allowed opacity-60'} transition-all duration-300`}
                   />
+                  {isMyTurn && (
+                    <div className="absolute -top-6 left-0 right-0 text-center text-xs font-bold text-white bg-green-600 rounded-full px-2 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      Draw
+                    </div>
+                  )}
                 </div>
                 <div className="bg-white rounded px-2 py-1 shadow-lg border border-gray-300">
                   <span className="text-gray-900 font-bold text-xs">DISCARD</span>
@@ -419,7 +590,7 @@ const Game = () => {
             onClick={handleArrange}
             disabled={hasArranged || hasWithdrawn}
             size="sm"
-            className="bg-white text-gray-900 hover:bg-gray-100 disabled:bg-gray-400 disabled:text-gray-600 border border-gray-300 shadow-lg font-bold game-button text-xs px-3 py-2"
+            className="bg-white text-gray-900 hover:bg-gray-100 disabled:bg-gray-400 disabled:text-gray-600 border border-gray-300 shadow-lg font-bold game-button text-xs px-3 py-2 hover:scale-105 transition-all duration-200"
           >
             <RotateCcw className="w-3 h-3 mr-1" />
             {hasArranged ? 'Done' : 'Sort'}
@@ -429,7 +600,7 @@ const Game = () => {
             onClick={handleDiscard}
             disabled={!isMyTurn || !selectedCard}
             size="sm"
-            className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 disabled:text-gray-600 text-white shadow-lg font-bold border border-orange-500 game-button text-xs px-3 py-2"
+            className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 disabled:text-gray-600 text-white shadow-lg font-bold border border-orange-500 game-button text-xs px-3 py-2 hover:scale-105 transition-all duration-200"
           >
             Discard {selectedCard ? '(1)' : '(0)'}
           </Button>
@@ -438,7 +609,7 @@ const Game = () => {
             onClick={handleDeclare}
             disabled={!isMyTurn}
             size="sm"
-            className="bg-green-700 hover:bg-green-800 disabled:bg-gray-400 disabled:text-gray-600 text-white shadow-lg font-bold border border-green-600 game-button text-xs px-3 py-2"
+            className="bg-green-700 hover:bg-green-800 disabled:bg-gray-400 disabled:text-gray-600 text-white shadow-lg font-bold border border-green-600 game-button text-xs px-3 py-2 hover:scale-105 transition-all duration-200"
           >
             <Trophy className="w-3 h-3 mr-1" />
             Declare
@@ -450,8 +621,8 @@ const Game = () => {
           <div className="relative flex overflow-x-auto" style={{ width: 'fit-content', maxWidth: '100%' }}>
             {hand.map((card, index) => (
               <div
-                key={card.id}
-                className="relative transition-all duration-300 playing-card flex-shrink-0"
+                key={card.id}git 
+                className="relative transition-all duration-300 playing-card flex-shrink-0 group"
                 style={{ 
                   marginLeft: index > 0 ? '-2rem' : '0',
                   zIndex: selectedCard === card.id ? 50 : 30 + index,
@@ -471,9 +642,28 @@ const Game = () => {
                   cardId={card.id}
                   size="lg"
                   className="shadow-xl hover:shadow-2xl transition-all duration-300"
+                  data-card-id={card.id}
                 />
+                {/* Mobile touch indicator */}
+                <div className="absolute inset-0 bg-white/10 rounded-lg opacity-0 group-active:opacity-100 md:hidden pointer-events-none transition-opacity duration-200"></div>
               </div>
             ))}
+          </div>
+          
+          {/* Mobile-specific controls */}
+          <div className="md:hidden mt-4 bg-black/30 rounded-lg p-2 absolute bottom-16 left-0 right-0 mx-auto w-max">
+            <div className="text-xs text-white text-center mb-2">Tap to select a card, then use buttons below</div>
+            <div className="flex justify-center gap-2">
+              <Button size="sm" variant="outline" className="bg-green-600 text-white text-xs" onClick={handleDrawCard} disabled={!isMyTurn}>
+                Draw
+              </Button>
+              <Button size="sm" variant="outline" className="bg-blue-600 text-white text-xs" onClick={handleDrawDiscard} disabled={!isMyTurn}>
+                Take Discard
+              </Button>
+              <Button size="sm" variant="outline" className="bg-red-600 text-white text-xs" onClick={handleDiscard} disabled={!isMyTurn || !selectedCard}>
+                Discard
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -486,7 +676,7 @@ const Game = () => {
           onClose={() => setShowScoreBoard(false)}
           players={[
             {
-              id: 'guest1234',
+              id: guestId,
               name: guestId,
               totalPoints: hasWithdrawn ? 80 : 0,
               roundsWon: 0,
@@ -494,7 +684,7 @@ const Game = () => {
               finalHand: hasWithdrawn ? hand.map(card => ({...card})) : undefined,
               position: 0
             },
-            ...players.filter(p => p.id !== 'guest1234').map((player, index) => ({
+            ...players.filter(p => p.id !== guestId).map((player, index) => ({
               id: player.id,
               name: player.name,
               totalPoints: 25 + (index * 10),
@@ -512,5 +702,61 @@ const Game = () => {
     </div>
   );
 };
+
+// Rummy Hand Validator Utility
+function isValidRummyHand(hand: GameCard[], joker: GameCard): boolean {
+  if (hand.length !== 13) return false;
+  // Helper functions
+  const rankOrder = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  const getCardValue = (card: GameCard) => rankOrder.indexOf(card.rank);
+  const isJoker = (card: GameCard) => card.suit === joker.suit && card.rank === joker.rank;
+  // Group by suit
+  const bySuit: {[suit: string]: GameCard[]} = {};
+  hand.forEach(card => {
+    if (!bySuit[card.suit]) bySuit[card.suit] = [];
+    bySuit[card.suit].push(card);
+  });
+  // Find pure sequences (no jokers)
+  let pureSequences = 0;
+  for (const suit in bySuit) {
+    const cards = bySuit[suit].filter(c => !isJoker(c)).sort((a,b) => getCardValue(a)-getCardValue(b));
+    let seq = 1;
+    for (let i=1; i<cards.length; i++) {
+      if (getCardValue(cards[i]) === getCardValue(cards[i-1])+1) {
+        seq++;
+        if (seq >= 3) pureSequences++;
+      } else {
+        seq = 1;
+      }
+    }
+  }
+  if (pureSequences < 1) return false;
+  // Find other sequences/sets (allowing jokers)
+  let otherValid = 0;
+  // Sequences with jokers
+  for (const suit in bySuit) {
+    const cards = bySuit[suit].sort((a,b) => getCardValue(a)-getCardValue(b));
+    let seq = 1, jokers = 0;
+    for (let i=1; i<cards.length; i++) {
+      if (isJoker(cards[i])) { jokers++; continue; }
+      if (getCardValue(cards[i]) === getCardValue(cards[i-1])+1) {
+        seq++;
+      } else if (jokers > 0) {
+        seq++;
+        jokers--;
+      } else {
+        seq = 1;
+        jokers = 0;
+      }
+      if (seq >= 3) otherValid++;
+    }
+  }
+  // Sets (same rank, different suits)
+  for (let r=0; r<rankOrder.length; r++) {
+    const cards = hand.filter(c => c.rank === rankOrder[r]);
+    if (cards.length + hand.filter(isJoker).length >= 3) otherValid++;
+  }
+  return otherValid >= 2;
+}
 
 export default Game;

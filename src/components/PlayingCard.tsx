@@ -137,8 +137,9 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
         isHighlighted && 'ring-4 ring-casino-gold ring-opacity-75 shadow-lg',
         isJoker && 'ring-4 ring-purple-500 ring-opacity-75 shadow-purple-300/50',
         !isSelected && !isJoker && 'border-gray-400',
-        'hover:scale-105 hover:shadow-xl hover:border-casino-gold/70',
+        'hover:scale-105 hover:shadow-xl hover:border-casino-gold/70 hover:-translate-y-1',
         draggable && 'cursor-move hover:cursor-grabbing',
+        'active:scale-95', // Add tactile feedback when clicked
         className
       )}
       onClick={onClick}

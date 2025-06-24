@@ -1,4 +1,6 @@
 
+import { io, Socket } from 'socket.io-client';
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -25,7 +27,10 @@ interface Player {
   avatar?: string;
 }
 
-const Lobby = () => {
+const SOCKET_SERVER_URL = 'http://localhost:4000';
+let socket: Socket | null = null;
+
+function Lobby() {
   const { roomCode } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -58,6 +63,25 @@ const Lobby = () => {
     return () => clearTimeout(timer);
   }, [players.length, maxPlayers]);
 
+  useEffect(() => {
+    if (roomCode && guestId) {
+      socket = io(SOCKET_SERVER_URL);
+      socket.emit('joinRoom', { roomCode, player: { id: guestId, name: guestId } });
+      socket.on('playerList', (players) => {
+        setPlayers(players);
+      });
+      socket.on('playerJoined', (player) => {
+        // Optionally handle player joined event
+      });
+      socket.on('playerLeft', (player) => {
+        // Optionally handle player left event
+      });
+      return () => {
+        socket.emit('leaveRoom', { roomCode });
+        socket?.disconnect();
+      };
+    }
+  }, [roomCode, guestId]);
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(joinLink);
